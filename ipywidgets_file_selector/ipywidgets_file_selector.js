@@ -30,6 +30,7 @@ define(['jquery', path ], function($, widget) {
 
 
             this.listenTo(this.model, 'change:current_path', this.current_path_changed, this);
+            this.listenTo(this.model, 'change:selected', this.selected_changed, this);
             var msg = { 'type' : 'init' };
             this.send(msg);
         },
@@ -82,7 +83,7 @@ define(['jquery', path ], function($, widget) {
                 }
                 that.cull_empty(that.selected);
             }
-            that.updateSelected();
+            that.updateSelected.apply(that);
         },
 
         cull_empty: function(ref) {
@@ -96,6 +97,11 @@ define(['jquery', path ], function($, widget) {
                     }
                 }
             }
+        },
+
+        selected_changed: function() {
+            this.selected = this.model.get('selected');
+            this.refresh_directory();
         },
 
         current_path_changed: function() {
@@ -217,10 +223,8 @@ define(['jquery', path ], function($, widget) {
         },
         
         updateSelected: function() {
-            var msg = { };
-            msg['type'] = 'select';
-            msg['selected'] = this.selected;
-            this.send(msg);
+            this.model.set('selected', this.selected);
+            this.model.save_changes();
         }
     });
 
