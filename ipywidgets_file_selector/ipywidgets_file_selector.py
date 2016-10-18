@@ -1,13 +1,12 @@
 from ipywidgets import DOMWidget
-from traitlets import Unicode, Int, List, observe
+from traitlets import Unicode, List, observe
 import os
 
 class IPFileSelector(DOMWidget):
     _view_module = Unicode('nbextensions/ipywidgets_file_selector/ipywidgets_file_selector', sync=True)
     _view_name = Unicode('IPFileSelector', sync=True)
-    home_path = Unicode(os.getcwd()).tag(sync=True)
+    home_path = Unicode().tag(sync=True)
     current_path = Unicode().tag(sync=True)
-    count = Int(555).tag(sync=True)
     subdirs = List().tag(sync=True)
     subfiles = List().tag(sync=True)
 
@@ -15,6 +14,7 @@ class IPFileSelector(DOMWidget):
 
     def __init__(self, *args, **kwargs):
         super(IPFileSelector, self).__init__(*args, **kwargs)
+        self.home_path = kwargs.get('home', os.getcwd())
         self.on_msg(self.handleMsg)
 
     def handleMsg(self, widget, content, buffers=None):
