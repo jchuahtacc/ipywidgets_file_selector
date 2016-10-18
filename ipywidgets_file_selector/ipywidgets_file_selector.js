@@ -11,7 +11,7 @@ define(['jquery', path ], function($, widget) {
     var IPFileSelector = widget.DOMWidgetView.extend({
         render: function() {
             this.$notebookList = $("<div></div>").addClass("list_container");
-            this.$notebookHeader = $("<div class='row list_header'><ul class='breadcrumb'></ul></div>").appendTo(this.$notebookList);
+            this.buildHeader();
 
             this.$breadcrumbs = this.$notebookHeader.find('.breadcrumb');
 
@@ -33,6 +33,100 @@ define(['jquery', path ], function($, widget) {
             this.listenTo(this.model, 'change:selected', this.selected_changed, this);
             var msg = { 'type' : 'init' };
             this.send(msg);
+        },
+
+        buildRef: function(path) {
+            var ref = this.selected;
+            var crumbs = this.get_crumbs(path);
+            for (var i in crumbs) {
+                 if (crumbs[i].length > 0) {
+                    if (ref[crumbs[i]] == undefined || ref[crumbs[i]] == true) {
+                        ref[crumbs[i]] = { };
+                    }
+                    ref = ref[crumbs[i]];
+                }
+            }
+            return ref;
+        },
+        
+        selectAll: function(e) {
+            var that = e.data.context;
+            if (!$(e.target).is("input:checkbox")) {
+               var $button = $(e.target).parent("button");
+                if ($button.length == 0) {
+                    e.target = $(e.target).find('input:checkbox');
+                    $(e.target).prop('checked', !$(e.target).prop('checked'));
+                }
+            }
+            var checked = $(e.target).prop('checked');            
+            that.dirsChecked = checked;
+            that.filesChecked = checked;
+            that.selectDirs(checked);
+            that.selectFiles(checked);
+        },
+
+        selectDirs: function(checked) {
+            var ref = this.buildRef(this.current_path);
+            for (var i in this.subdirs) {
+                var subdir = this.get_last_crumb(this.subdirs[i]);
+                if (checked) {
+                    ref[subdir] = true;
+                } else {
+                    delete ref[subdir];
+                }
+            }
+            $("div[data-type='folder'] input:checkbox").prop('checked', checked);
+            this.cull_empty(this.selected);
+            this.updateSelected();
+        },
+
+        selectFiles: function(checked) {
+            var ref = this.buildRef(this.current_path);
+            for (var i in this.subfiles) {
+                var subfile = this.get_last_crumb(this.subfiles[i]);
+                if (checked) {
+                    ref[subfile] = true;
+                } else {
+                    delete ref[subfile];
+                }
+            }
+            $("div[data-type='file'] input:checkbox").prop('checked', checked);
+            this.cull_empty(this.selected);
+            this.updateSelected();
+        },
+        
+        buildHeader: function() {
+            this.$notebookHeader = $("<div class='row list_header' style='padding: 0 0 0 0;'></div>");
+            var $buttonGroup = $("<div class='btn-group dropdown' style='display: inline-block; margin: 0 0 0 0;'></div>");
+            var $selectAll = $("<button title='Select All/None' type='button' class='btn btn-default btn-xs'></button>");
+            $selectAll.click({ context : this }, this.selectAll);
+            var $selectAllCheck = $("<input type='checkbox' class='pull-left tree-selector'><span>&nbsp;</span></input>");
+            $selectAllCheck.appendTo($selectAll);
+            $selectAll.appendTo($buttonGroup);
+            var $select = $("<button title='Select...' id='ipfs_tree_selector_button' class='btn btn-default btn-xs dropdown-toggle' type='button' data-toggle='dropdown' area-expanded='true'><span class='caret'></span><span class='sr-only'>Toggle Dropdown</span></button>");
+            $select.appendTo($buttonGroup);
+            var $selectMenu = $("<ul class='dropdown-menu' role='menu' aria-labelledby='ipfs_tree_selector_button'></ul>");
+            $($selectMenu).appendTo($buttonGroup);            
+            
+            var $folders = $("<li role='presentation'><a role='menuitem' tabindex='-1' href='#' title='Select All Folders'><i class='menu_icon folder_icon icon-fixed-width'></i> Folders</a></li");
+            $folders.click($.proxy(function() { 
+                this.dirsChecked = !this.dirsChecked;
+                this.selectDirs(this.dirsChecked);
+            }, this));
+
+            var $files = $("<li role='presentation'><a role='menuitem' tabindex='-1' href='#' title='Select All Files'><i class='menu_icon file_icon icon-fixed-width'></i> Files</a></li>");
+            $files.click($.proxy(function() {
+                this.filesChecked = !this.filesChecked;
+                this.selectFiles(this.filesChecked);
+            }, this));
+
+            $($folders).appendTo($selectMenu);
+            $($files).appendTo($selectMenu);
+
+
+            this.$notebookHeader.append($buttonGroup);
+            this.$notebookHeader.append($("<div style='display: inline-block; margin: 0 0 0 0;'><ul class='breadcrumb' style='margin: 0 0 0 0; padding: 0 0 0 0;'></ul></div>"));
+            this.$notebookHeader.appendTo(this.$notebookList);
         },
 
         handleMsg: function(msg) {
@@ -134,6 +228,11 @@ define(['jquery', path ], function($, widget) {
             return false;
         },
 
+        get_last_crumb: function(path) {
+            var crumbs = this.get_crumbs(path);
+            return crumbs[crumbs.length - 1];
+        },
+
         get_crumbs: function(path) {
             return path.substring(this.home_path.length + 1).split('/');
         },
@@ -141,6 +240,9 @@ define(['jquery', path ], function($, widget) {
         refresh_directory: function() {
             this.subdirs = this.model.get("subdirs");
             this.subfiles = this.model.get("subfiles");
+
+            this.dirsChecked = false;
+            this.filesChecked = false;
 
             // select all files if parent directory is selected
             var ref = this.selected;
@@ -152,13 +254,11 @@ define(['jquery', path ], function($, widget) {
                     select_all = true;
                     ref[crumbs[i]] = { };
                     for (var j in this.subdirs) {
-                        var subdir_crumb = this.get_crumbs(this.subdirs[j]);
-                        var subdir = subdir_crumb[subdir_crumb.length - 1];
+                        var subdir = this.get_last_crumb(this.subdirs[j]);
                         ref[crumbs[i]][subdir] = true;
                     }
                     for (var j in this.subfiles) {
-                        var subfile_crumb = this.get_crumbs(this.subfiles[j]);
-                        var subfile = subfile_crumb[subfile_crumb.length - 1];
+                        var subfile = this.get_last_crumb(this.subfiles[j]);
                         ref[crumbs[i]][subfile] = true;
                     }
                 } else {
@@ -219,12 +319,15 @@ define(['jquery', path ], function($, widget) {
                 $row.append($("::after"));
                 $row.appendTo(this.$notebookList);
             }
-            this.$notebookList.find("input:checkbox").click({ context : this }, this.checkbox_click);
+            this.$notebookList.find("div [data-type='folder'] input:checkbox").click({ context : this }, this.checkbox_click);
+            this.$notebookList.find("div [data-type='file'] input:checkbox").click({ context : this }, this.checkbox_click);
         },
         
         updateSelected: function() {
-            this.model.set('selected', this.selected);
-            this.model.save_changes();
+            var msg = { 'type' : 'select', 'selected' : this.selected };
+            this.send(msg);
+//            this.model.set('selected', this.selected);
+//            this.model.save_changes();
         }
     });
 

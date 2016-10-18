@@ -14,16 +14,16 @@ class IPFileSelector(DOMWidget):
     def __init__(self, *args, **kwargs):
         super(IPFileSelector, self).__init__(*args, **kwargs)
         self.home_path = kwargs.get('home', os.getcwd())
-        self.on_msg(self.handleMsg)
+        self.on_msg(self._handleMsg)
 
-    def handleMsg(self, widget, content, buffers=None):
+    def _handleMsg(self, widget, content, buffers=None):
         if (content['type'] == 'init'):
-            self.current_path_changed(None)
+            self._current_path_changed(None)
         if (content['type'] == 'select'):
-            pass
+            self.selected = content['selected']
 
     @observe('current_path')
-    def current_path_changed(self, change):
+    def _current_path_changed(self, change):
         subdirs_temp = [ ]
         subfiles_temp = [ ]
         if (os.path.isdir(self.current_path)):
@@ -40,5 +40,5 @@ class IPFileSelector(DOMWidget):
         self.send(msg)
 
     @observe('selected')
-    def test_changed(self, change):
+    def _selected_changed(self, change):
         pass
