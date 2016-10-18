@@ -30,7 +30,7 @@ For development installs
 pip install -e .
 ```
 
-## Troubleshooting
+### Troubleshooting
 
 Sometimes pip or jupyter-pip, or a combination of the two, misbehaves.  When that happens, try installing by using  
 ```
