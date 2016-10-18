@@ -1,21 +1,23 @@
-# ipython-widgetboilerplate
-Boilerplate code for custom python Jupyter Notebook widgets (IPython).
+# `ipywidgets_file_selector`
 
-This repository contains a simple empty widget, and can be used as a starting point for your custom widget project.  It is comprised of front-end and back-end widget code and a basic deployment solution using [jupyter-pip](https://github.com/jdfreder/jupyter-pip).
+An IPython Widget that displays files and subdirectories, allowing a user to select items. Client code can retrieve selected item dictionary from the `selected` member variable.
 
-## The pieces
+## Usage
 
-`setup.py` Install script.  Contains [jupyter-pip](https://github.com/jdfreder/jupyter-pip) logic.
+This package has one class - `IPFileSelector`. The constrcutor takes an optional `home` argument, specifying the highest directory level that can be browsed. If no `home` argument is supplied, then the current working directory of the IPython notebook as determined by `os.getcwd()` is used.
 
-`mywidget/mywidget.js` Custom widget front-end Javascript code.  This contains the logic that describes how the widget will be rendered in the webbrowser.
+At any time, client code and access the `selected` member of `IPFileSelector`. It is a dictionary containing a list of files and subdirectories that have been selected by the user. The dictionary structure represents all subdirectories and files relative to the home directory that have been selected.
 
-`mywidget/mywidget.py` Custom widget back-end Python code.  This contains the back-end logic, that describes the data structure of the widget's model (this is what gets synced between the front-end and back-end, Javascript and Python in this case).  This is also where the Jupyter notebook looks to find the location of the front-end code (`mywidget/mywidget.js`).
+Subdirectories or files that are `true` are those that have been selected. If individual files within those subdirectories have been selected or deselected, subdirectories will instead be an object containing keys corresponding to all files.
 
-`mywidget/__init__.py` Describes the namespace in Python.
+The widget takes a greedy approach to selecting files within a subdirectory. That is to say that if the user selects a directory and then browses it, all contents of the selected directory are immediately selected.
 
-`examples/` Example notebooks using the widget.
+## Acknowledgements
 
-## Deployment
+Built from [https://github.com/jdfreder/ipython-widgetboilerplate](https://github.com/jdfreder/ipython-widgetboilerplate) by J. D. Freder.
+
+### Deployment instructions (from original ipython-widgetboilerplate)
+
 Installation is made easy by [jupyter-pip](https://github.com/jdfreder/jupyter-pip).  To install  
 
 ```
@@ -26,12 +28,6 @@ For development installs
 
 ```
 pip install -e .
-```
-
-If can deploy your package to PYPI, and then your user will be able to install it like any other package  
-
-```
-pip install PACKAGENAME
 ```
 
 ## Troubleshooting
