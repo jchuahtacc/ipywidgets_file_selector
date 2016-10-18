@@ -3,7 +3,7 @@ from traitlets import Unicode, Int, List, observe
 import os
 
 class IPFileSelector(DOMWidget):
-    _view_module = Unicode('nbextensions/ipython_file_selector/ipython_file_selector', sync=True)
+    _view_module = Unicode('nbextensions/ipywidgets_file_selector/ipywidgets_file_selector', sync=True)
     _view_name = Unicode('IPFileSelector', sync=True)
     home_path = Unicode(os.getcwd()).tag(sync=True)
     current_path = Unicode().tag(sync=True)

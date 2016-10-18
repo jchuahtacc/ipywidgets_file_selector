@@ -8,19 +8,19 @@ except:
     pip.main(['install', 'jupyter-pip']); cmdclass = importlib.import_module('jupyterpip').cmdclass
 
 setup(
-    name='ipython_file_selector',
+    name='ipywidgets_file_selector',
     version='0.1',
-    description='',
-    author='',
-    author_email='',
+    description='ipywidget that allows users to ipython local files and access them in a dict',
+    author='Joon-Yee Chuah',
+    author_email='jchuah@tacc.utexas.edu',
     license='',
-    url='https://github.com/jchuahtacc/ipython-file-selector',
-    keywords='python ipython javascript widget mywidget',
+    url='https://github.com/jchuahtacc/ipywidgets_file_selector',
+    keywords='python ipython javascript widget ipywidgets_file_selector ipywidgets',
     classifiers=['Development Status :: 4 - Beta',
                  'Programming Language :: Python',
                  'License :: OSI Approved :: MIT License'],
-    packages=['ipython_file_selector'],
+    packages=['ipywidgets_file_selector'],
     include_package_data=True,
     install_requires=["jupyter-pip"],
-    cmdclass=cmdclass('ipython_file_selector'),
+    cmdclass=cmdclass('ipywidgets_file_selector'),
 )
