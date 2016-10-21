@@ -319,8 +319,8 @@ define(['jquery', path ], function($, widget) {
                 $row.append($("::after"));
                 $row.appendTo(this.$notebookList);
             }
-            this.$notebookList.find("div [data-type='folder'] input:checkbox").click({ context : this }, this.checkbox_click);
-            this.$notebookList.find("div [data-type='file'] input:checkbox").click({ context : this }, this.checkbox_click);
+            this.$notebookList.find("div[data-type='folder'] input:checkbox").click({ context : this }, this.checkbox_click);
+            this.$notebookList.find("div[data-type='file'] input:checkbox").click({ context : this }, this.checkbox_click);
         },
         
         updateSelected: function() {
