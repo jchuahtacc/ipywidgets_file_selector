@@ -31,6 +31,8 @@ define(['jquery', path ], function($, widget) {
 
             this.listenTo(this.model, 'change:current_path', this.current_path_changed, this);
             this.listenTo(this.model, 'change:selected', this.selected_changed, this);
+            this.listenTo(this.model, 'change:subfiles', this.refresh_directory, this);
+            this.listenTo(this.model, 'change:subdirs', this.refresh_directory, this);
             var msg = { 'type' : 'init' };
             this.send(msg);
         },
@@ -245,10 +247,10 @@ define(['jquery', path ], function($, widget) {
             this.filesChecked = false;
 
             // select all files if parent directory is selected
-            var ref = this.selected;
+            var ref = this.model.get('selected');
+            this.selected = ref;
             var crumbs = this.get_crumbs(this.current_path);
             var select_all = false;
-            var ref = this.selected;
             for (var i = 0; i < crumbs.length && !select_all && !(ref == undefined || ref == null); i = i + 1) {
                 if (ref[crumbs[i]] == true) {
                     select_all = true;
@@ -290,12 +292,15 @@ define(['jquery', path ], function($, widget) {
             // add child directories and folders
             $("[data-type='folder']").remove();
             $("[data-type='file']").remove();
+            var $current_folders = $("[data-type='folder']");
+            var $current_files = $("[data-type='file']");
             for (var i in this.subdirs) {
                 var subdir = this.subdirs[i];
                 var checked = this.path_selected(subdir);
                 var $row = $("<div data-type='folder'></div>").addClass("list_item").addClass("row");
                 var $container = $("<div class='col-md-12'></div>").appendTo($row);
                 var $checkbox = $("<input type='checkbox' />").appendTo($container);
+                $checkbox.click({ context : this }, this.checkbox_click);
                 $checkbox.prop('checked', checked);
                 var $icon = $("<i class='item_icon folder_icon icon-fixed-width'></i>").appendTo($container);
                 var subdir_display = subdir.substring(this.current_path.length + 1) + "/";
@@ -311,6 +316,7 @@ define(['jquery', path ], function($, widget) {
                 var $row = $("<div data-type='file'></div>").addClass("list_item").addClass("row");
                 var $container = $("<div class='col-md-12'></div>").appendTo($row);
                 var $checkbox = $("<input type='checkbox' />").appendTo($container);
+                $checkbox.click({ context : this }, this.checkbox_click);
                 $checkbox.prop('checked', checked);
                 var $icon = $("<i class='item_icon file_icon icon-fixed-width'></i>").appendTo($container);
                 subfile_display = subfile.substring(this.current_path.length + 1);
@@ -319,8 +325,6 @@ define(['jquery', path ], function($, widget) {
                 $row.append($("::after"));
                 $row.appendTo(this.$notebookList);
             }
-            this.$notebookList.find("div[data-type='folder'] input:checkbox").click({ context : this }, this.checkbox_click);
-            this.$notebookList.find("div[data-type='file'] input:checkbox").click({ context : this }, this.checkbox_click);
         },
         
         updateSelected: function() {
